@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador de Productos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .price-display {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .price-display p {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .price-display .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-agregar {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-agregar:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-finalizar {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-finalizar:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-pdf {
+            background: #c96f1a;
+            color: white;
+        }
+
+        .btn-pdf:hover {
+            background: #b85f0f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(201, 111, 26, 0.35);
+        }
+
+        .btn-pdf:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-finalizar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .table-section {
+            margin-top: 30px;
+        }
+
+        .table-section h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: #f0f0f0;
+            border-top: 2px solid #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #666;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background 0.3s;
+        }
+
+        .btn-eliminar:hover {
+            background: #c82333;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .summary {
+            background: #f0f0f0;
+            border-top: 2px solid #667eea;
+            padding: 15px;
+            text-align: right;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-row:last-child {
+            font-size: 1.2em;
+            color: #667eea;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 10px;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .stock-info {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #1f4a7a;
+            font-weight: 600;
+        }
+
+        .stock-warning {
+            color: #dc3545;
+        }
+
+        .preview-section {
+            margin-top: 30px;
+            background: #fffaf3;
+            border: 1px solid #efd3ad;
+            border-radius: 10px;
+            padding: 24px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #efcfaa;
+            padding-bottom: 16px;
+        }
+
+        .preview-brand h2 {
+            color: #9a4f08;
+            margin-bottom: 6px;
+        }
+
+        .preview-brand p,
+        .preview-meta p {
+            color: #5b5b5b;
+            font-size: 0.95em;
+            margin-bottom: 4px;
+        }
+
+        .preview-meta {
+            text-align: right;
+        }
+
+        .preview-note {
+            margin-bottom: 14px;
+            color: #4e4e4e;
+            font-size: 0.95em;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+        }
+
+        .preview-table th {
+            background: #f1d3ab;
+            color: #4a2a05;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            border: 1px solid #e9d4b7;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .preview-totals {
+            max-width: 320px;
+            margin-left: auto;
+        }
+
+        .preview-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #333;
+            border-bottom: 1px solid #ead8bd;
+        }
+
+        .preview-total-row.final {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #9a4f08;
+            border-bottom: none;
+            padding-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💼 Cotizador de Productos</h1>
+            <p>Genera cotizaciones personalizadas en Lempiras (L)</p>
+        </div>
+
+        <div class="content">
+            <div class="form-section" style="border-left-color: #28a745;">
+                <h3 style="margin-bottom: 16px; color: #333;">Datos del Cliente</h3>
+                <div class="form-group" style="max-width: 420px;">
+                    <label for="nombreCliente">Nombre del Cliente</label>
+                    <input type="text" id="nombreCliente" placeholder="Ej: Juan Pérez" maxlength="80">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 style="margin-bottom: 20px; color: #333;">Agregar Línea de Cotización</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="porcentaje">% de Venta</label>
+                        <select id="porcentaje" required>
+                            <option value="">-- Seleccionar --</option>
+                            <option value="80">80%</option>
+                            <option value="90">90%</option>
+                            <option value="100">100%</option>
+                            <option value="110">110%</option>
+                            <option value="115">115%</option>
+                            <option value="120">120%</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numeracion">Numeración</label>
+                        <select id="numeracion" required>
+                            <option value="">-- Seleccionar --</option>
+                            <option value="7.5">7.5</option>
+                            <option value="10">10</option>
+                            <option value="12.5">12.5</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad de Unidades</label>
+                        <input type="number" id="cantidad" placeholder="Ej: 100" min="1" required>
+                        <div class="stock-info" id="stockInfo">Selecciona una numeración para ver stock disponible</div>
+                        <span class="error" id="errorCantidad"></span>
+                    </div>
+                </div>
+
+                <div class="price-display" id="priceDisplay" style="display: none;">
+                    <p>Precio Unitario Asignado:</p>
+                    <div class="value" id="precioUnitario">L 0.00</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-agregar" onclick="agregarLinea()">✅ Ingresar Línea</button>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <h2>Líneas de Cotización</h2>
+                <table id="cotizacionTable">
+                    <thead>
+                        <tr>
+                            <th>Numeración</th>
+                            <th>% Venta</th>
+                            <th>Precio Unitario</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="empty-message">
+                            <td colspan="6">No hay líneas agregadas. Completa el formulario y presiona "Ingresar Línea"</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="summary" id="summaryDiv" style="display: none;">
+                    <div class="summary-row">
+                        <span>Total de Unidades:</span>
+                        <span id="totalUnidades">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="valorTotal">L 0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Impuesto ISV 15%:</span>
+                        <span id="impuestoIsv">L 0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Total:</span>
+                        <span id="totalConImpuesto">L 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group" style="margin-top: 30px;">
+                <button class="btn-pdf" id="btnGenerarPdf" onclick="generarCotizacionPDF()" disabled>📄 Generar Cotización</button>
+                <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarCotizacion()" disabled>✔️ Finalizar</button>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <div class="preview-header">
+                    <div class="preview-brand">
+                        <h2>Cotización</h2>
+                        <p>Pet World Isabelinos</p>
+                        <p id="previewCliente" style="font-weight:600; color:#333;"></p>
+                    </div>
+                    <div class="preview-meta">
+                        <p id="previewFecha">Fecha: --/--/----</p>
+                        <p id="previewLineas">Líneas: 0</p>
+                        <p id="previewUnidades">Unidades: 0</p>
+                    </div>
+                </div>
+
+                <p class="preview-note">Vista previa del PDF que se descargará con el detalle completo de la cotización.</p>
+
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Numeración</th>
+                            <th>Precio Unitario</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                        <tr>
+                            <td colspan="4" class="empty-message">No hay datos para mostrar</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="preview-totals">
+                    <div class="preview-total-row">
+                        <span>Subtotal</span>
+                        <span id="previewSubtotal">L 0.00</span>
+                    </div>
+                    <div class="preview-total-row">
+                        <span>ISV 15%</span>
+                        <span id="previewIsv">L 0.00</span>
+                    </div>
+                    <div class="preview-total-row final">
+                        <span>Total</span>
+                        <span id="previewTotal">L 0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+    <script>
+        // URLs opcionales para cargar inventario desde Google Sheets en formato CSV.
+        // Debe contener columnas: codigo,numeracion,stock (pueden variar mayúsculas/minúsculas).
+        const INVENTARIO_CSV_URLS = [
+            'https://docs.google.com/spreadsheets/d/1IQ7quO27pvdTWPXJjvID4TaoShQ9rBTDdUh94Rew-3s/gviz/tq?tqx=out:csv&sheet=INVENTARIO',
+            'https://docs.google.com/spreadsheets/d/1IQ7quO27pvdTWPXJjvID4TaoShQ9rBTDdUh94Rew-3s/export?format=csv&gid=0'
+        ];
+
+        // Base de datos de productos
+        const productos = {
+            "7.5": { unidades: 150, costo: 4.95, precios: { 80: 17.10, 90: 18.20, 100: 20.00, 110: 20.50, 115: 20.60, 120: 20.90 } },
+            "10": { unidades: 500, costo: 5.23, precios: { 80: 20.80, 90: 22.00, 100: 23.00, 110: 24.15, 115: 24.72, 120: 25.30 } },
+            "12.5": { unidades: 200, costo: 8.80, precios: { 80: 23.60, 90: 25.00, 100: 26.00, 110: 27.30, 115: 27.95, 120: 28.60 } },
+            "15": { unidades: 500, costo: 13.75, precios: { 80: 37.00, 90: 39.00, 100: 41.00, 110: 43.05, 115: 44.07, 120: 45.10 } },
+            "20": { unidades: 500, costo: 20.07, precios: { 80: 53.00, 90: 55.50, 100: 58.00, 110: 60.90, 115: 62.35, 120: 63.80 } },
+            "25": { unidades: 250, costo: 26.39, precios: { 80: 65.10, 90: 68.50, 100: 72.00, 110: 75.60, 115: 77.40, 120: 79.20 } },
+            "30": { unidades: 200, costo: 30.79, precios: { 80: 73.00, 90: 76.00, 100: 80.00, 110: 84.00, 115: 86.00, 120: 88.00 } }
+        };
+
+        let cotizacionActual = [];
+
+        function formatearLempiras(valor) {
+            return `L ${Number(valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function calcularResumenCotizacion() {
+            const totalUnidades = cotizacionActual.reduce((sum, item) => sum + item.cantidad, 0);
+            const subtotal = cotizacionActual.reduce((sum, item) => sum + item.total, 0);
+            const impuestoIsv = subtotal * 0.15;
+            const total = subtotal + impuestoIsv;
+
+            return {
+                totalUnidades,
+                subtotal,
+                impuestoIsv,
+                total,
+                lineas: cotizacionActual.length
+            };
+        }
+
+        cargarInventarioDesdeSheets();
+
+        // Event listeners
+        document.getElementById('porcentaje').addEventListener('change', actualizarPrecio);
+        document.getElementById('numeracion').addEventListener('change', actualizarPrecio);
+        document.getElementById('cantidad').addEventListener('input', actualizarPrecio);
+
+        function obtenerStockDisponible(numeracion) {
+            const producto = productos[numeracion];
+            if (!producto) return 0;
+
+            const reservado = cotizacionActual
+                .filter(item => item.numeracion === numeracion)
+                .reduce((sum, item) => sum + item.cantidad, 0);
+
+            return Math.max(0, producto.unidades - reservado);
+        }
+
+        function actualizarStockInfo() {
+            const numeracion = document.getElementById('numeracion').value;
+            const cantidadInput = document.getElementById('cantidad');
+            const stockInfo = document.getElementById('stockInfo');
+
+            if (!numeracion || !productos[numeracion]) {
+                cantidadInput.removeAttribute('max');
+                stockInfo.textContent = 'Selecciona una numeración para ver stock disponible';
+                stockInfo.classList.remove('stock-warning');
+                return;
+            }
+
+            const disponible = obtenerStockDisponible(numeracion);
+            cantidadInput.max = disponible;
+            stockInfo.textContent = `Stock disponible para ${numeracion}: ${disponible} unidades`;
+
+            if (disponible === 0) {
+                stockInfo.classList.add('stock-warning');
+            } else {
+                stockInfo.classList.remove('stock-warning');
+            }
+        }
+
+        function validarCantidadContraStock(numeracion, cantidad) {
+            const errorCantidad = document.getElementById('errorCantidad');
+            const disponible = obtenerStockDisponible(numeracion);
+
+            if (cantidad > disponible) {
+                errorCantidad.textContent = `Solo hay ${disponible} unidades disponibles para la numeración ${numeracion}`;
+                return false;
+            }
+
+            return true;
+        }
+
+        async function cargarInventarioDesdeSheets() {
+            if (!INVENTARIO_CSV_URLS.length) return;
+
+            try {
+                let csvText = '';
+
+                for (const url of INVENTARIO_CSV_URLS) {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        csvText = await response.text();
+                        if (csvText && csvText.trim()) break;
+                    }
+                }
+
+                if (!csvText) {
+                    console.warn('No se pudo cargar inventario remoto. Revisa permisos de Google Sheets.');
+                    return;
+                }
+
+                const lineas = csvText
+                    .split(/\r?\n/)
+                    .map(linea => linea.trim())
+                    .filter(Boolean);
+
+                if (lineas.length < 2) return;
+
+                const headers = lineas[0].split(',').map(h => h.trim().toLowerCase());
+                const idxNumeracion = headers.findIndex(h => h === 'numeracion' || h === 'codigo' || h === 'code');
+                const idxStock = headers.findIndex(h => h === 'stock' || h === 'unidades' || h === 'disponible');
+
+                if (idxNumeracion === -1 || idxStock === -1) return;
+
+                for (let i = 1; i < lineas.length; i++) {
+                    const cols = lineas[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                    const numeracion = cols[idxNumeracion];
+                    const stock = parseInt(cols[idxStock], 10);
+
+                    if (productos[numeracion] && Number.isFinite(stock)) {
+                        productos[numeracion].unidades = stock;
+                    }
+                }
+
+                actualizarStockInfo();
+                actualizarPrecio();
+            } catch (error) {
+                console.warn('No se pudo cargar inventario desde Google Sheets:', error);
+            }
+        }
+
+        function actualizarPrecio() {
+            const porcentaje = document.getElementById('porcentaje').value;
+            const numeracion = document.getElementById('numeracion').value;
+            const cantidad = document.getElementById('cantidad').value;
+            const priceDisplay = document.getElementById('priceDisplay');
+            const errorCantidad = document.getElementById('errorCantidad');
+
+            errorCantidad.textContent = '';
+            actualizarStockInfo();
+
+            if (porcentaje && numeracion && cantidad) {
+                if (cantidad <= 0) {
+                    errorCantidad.textContent = 'La cantidad debe ser mayor que 0';
+                    priceDisplay.style.display = 'none';
+                    return;
+                }
+
+                if (!validarCantidadContraStock(numeracion, parseInt(cantidad, 10))) {
+                    priceDisplay.style.display = 'none';
+                    return;
+                }
+
+                const producto = productos[numeracion];
+                const precioUnitario = producto.precios[parseInt(porcentaje)];
+                document.getElementById('precioUnitario').textContent = formatearLempiras(precioUnitario);
+                priceDisplay.style.display = 'block';
+            } else {
+                priceDisplay.style.display = 'none';
+            }
+        }
+
+        function agregarLinea() {
+            const porcentaje = document.getElementById('porcentaje').value;
+            const numeracion = document.getElementById('numeracion').value;
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+            const errorCantidad = document.getElementById('errorCantidad');
+
+            errorCantidad.textContent = '';
+
+            // Validaciones
+            if (!porcentaje) {
+                alert('Por favor selecciona un porcentaje de venta');
+                return;
+            }
+            if (!numeracion) {
+                alert('Por favor selecciona una numeración');
+                return;
+            }
+            if (!cantidad || cantidad <= 0) {
+                errorCantidad.textContent = 'La cantidad debe ser mayor que 0';
+                return;
+            }
+
+            if (!validarCantidadContraStock(numeracion, cantidad)) {
+                return;
+            }
+
+            const producto = productos[numeracion];
+            const precioUnitario = producto.precios[parseInt(porcentaje)];
+            const total = precioUnitario * cantidad;
+
+            cotizacionActual.push({
+                numeracion: numeracion,
+                porcentaje: porcentaje,
+                precioUnitario: precioUnitario,
+                cantidad: cantidad,
+                total: total
+            });
+
+            // Limpiar formulario
+            document.getElementById('porcentaje').value = '';
+            document.getElementById('numeracion').value = '';
+            document.getElementById('cantidad').value = '';
+            document.getElementById('priceDisplay').style.display = 'none';
+            actualizarStockInfo();
+
+            actualizarTabla();
+        }
+
+        function actualizarTabla() {
+            const tableBody = document.getElementById('tableBody');
+            const summaryDiv = document.getElementById('summaryDiv');
+            const btnFinalizar = document.getElementById('btnFinalizar');
+            const btnGenerarPdf = document.getElementById('btnGenerarPdf');
+            const previewSection = document.getElementById('previewSection');
+
+            if (cotizacionActual.length === 0) {
+                tableBody.innerHTML = '<tr class="empty-message"><td colspan="6">No hay líneas agregadas. Completa el formulario y presiona "Ingresar Línea"</td></tr>';
+                summaryDiv.style.display = 'none';
+                btnFinalizar.disabled = true;
+                btnGenerarPdf.disabled = true;
+                previewSection.style.display = 'none';
+                return;
+            }
+
+            tableBody.innerHTML = cotizacionActual.map((item, index) => `
+                <tr>
+                    <td>${item.numeracion}</td>
+                    <td>${item.porcentaje}%</td>
+                    <td>${formatearLempiras(item.precioUnitario)}</td>
+                    <td>${item.cantidad}</td>
+                    <td>${formatearLempiras(item.total)}</td>
+                    <td><button class="btn-eliminar" onclick="eliminarLinea(${index})">Eliminar</button></td>
+                </tr>
+            `).join('');
+
+            // Calcular totales
+            const resumen = calcularResumenCotizacion();
+
+            document.getElementById('totalUnidades').textContent = resumen.totalUnidades;
+            document.getElementById('valorTotal').textContent = formatearLempiras(resumen.subtotal);
+            document.getElementById('impuestoIsv').textContent = formatearLempiras(resumen.impuestoIsv);
+            document.getElementById('totalConImpuesto').textContent = formatearLempiras(resumen.total);
+
+            summaryDiv.style.display = 'block';
+            btnFinalizar.disabled = false;
+            btnGenerarPdf.disabled = false;
+            actualizarStockInfo();
+            renderizarVistaPrevia();
+        }
+
+        function renderizarVistaPrevia() {
+            const previewSection = document.getElementById('previewSection');
+            const previewTableBody = document.getElementById('previewTableBody');
+            const previewFecha = document.getElementById('previewFecha');
+            const previewLineas = document.getElementById('previewLineas');
+            const previewUnidades = document.getElementById('previewUnidades');
+            const previewCliente = document.getElementById('previewCliente');
+            const previewSubtotal = document.getElementById('previewSubtotal');
+            const previewIsv = document.getElementById('previewIsv');
+            const previewTotal = document.getElementById('previewTotal');
+
+            if (cotizacionActual.length === 0) {
+                previewSection.style.display = 'none';
+                return;
+            }
+
+            const resumen = calcularResumenCotizacion();
+            previewFecha.textContent = `Fecha: ${new Date().toLocaleDateString('es-HN')}`;
+            const clienteNombre = document.getElementById('nombreCliente').value.trim();
+            previewCliente.textContent = clienteNombre ? `Cliente: ${clienteNombre}` : '';
+            previewLineas.textContent = `Líneas: ${resumen.lineas}`;
+            previewUnidades.textContent = `Unidades: ${resumen.totalUnidades}`;
+            previewSubtotal.textContent = formatearLempiras(resumen.subtotal);
+            previewIsv.textContent = formatearLempiras(resumen.impuestoIsv);
+            previewTotal.textContent = formatearLempiras(resumen.total);
+
+            previewTableBody.innerHTML = cotizacionActual.map(item => `
+                <tr>
+                    <td>${item.numeracion}</td>
+                    <td>${formatearLempiras(item.precioUnitario)}</td>
+                    <td>${item.cantidad}</td>
+                    <td>${formatearLempiras(item.total)}</td>
+                </tr>
+            `).join('');
+
+            previewSection.style.display = 'block';
+        }
+
+        async function generarCotizacionPDF() {
+            if (cotizacionActual.length === 0) {
+                alert('No hay líneas para generar la cotización');
+                return;
+            }
+
+            const fecha = new Date();
+            const resumen = calcularResumenCotizacion();
+            const clientePDF = document.getElementById('nombreCliente').value.trim();
+            const nombreArchivo = `cotizacion-${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}.pdf`;
+
+            // Intentar usar papel membretado con pdf-lib
+            try {
+                const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+                // Cargar el papel membretado
+                const membretadoBytes = await fetch('PAPEL MEMBRETADO.pdf').then(r => {
+                    if (!r.ok) throw new Error('No se pudo cargar el papel membretado');
+                    return r.arrayBuffer();
+                });
+
+                const pdfDoc = await PDFDocument.load(membretadoBytes);
+                const [page] = pdfDoc.getPages();
+                const { width, height } = page.getSize();
+
+                const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                const fontNormal = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+                const colorOscuro = rgb(0.16, 0.16, 0.16);
+                const colorNaranja = rgb(0.79, 0.44, 0.10);
+                const colorCabecera = rgb(0.95, 0.82, 0.67);
+                const colorLinea = rgb(0.80, 0.76, 0.72);
+
+                // --- Título y meta (ajustado para no pisar el membretado) ---
+                const inicioY = height - 220; // empezar debajo del encabezado/logo del membretado
+
+                page.drawText('COTIZACION', {
+                    x: 45,
+                    y: inicioY,
+                    size: 16,
+                    font: fontBold,
+                    color: colorNaranja
+                });
+
+                page.drawLine({
+                    start: { x: 45, y: inicioY - 6 },
+                    end: { x: width - 45, y: inicioY - 6 },
+                    thickness: 1,
+                    color: colorNaranja
+                });
+
+                // Fecha y datos
+                const metaY = inicioY - 22;
+                page.drawText(`Fecha: ${fecha.toLocaleDateString('es-HN')}`, {
+                    x: 45, y: metaY, size: 9, font: fontNormal, color: colorOscuro
+                });
+                if (clientePDF) {
+                    page.drawText(`Cliente: ${clientePDF}`, {
+                        x: 45, y: metaY - 14, size: 10, font: fontBold, color: colorOscuro
+                    });
+                }
+                page.drawText(`Lineas: ${resumen.lineas}   |   Unidades: ${resumen.totalUnidades}`, {
+                    x: width - 220, y: metaY, size: 9, font: fontNormal, color: colorOscuro
+                });
+
+                // --- Tabla ---
+                const colX = [45, 155, 295, 390, 490];
+                const colWidths = [110, 140, 95, 100, 80];
+                const headers = ['Numeracion', 'Precio Unitario', 'Cantidad', 'Subtotal'];
+                const rowHeight = 18;
+                // Si hay cliente, dejamos mas espacio para que la tabla no se monte sobre el nombre.
+                let tableY = metaY - (clientePDF ? 36 : 18);
+
+                // Cabecera de tabla
+                page.drawRectangle({
+                    x: colX[0],
+                    y: tableY - rowHeight + 4,
+                    width: width - 90,
+                    height: rowHeight,
+                    color: colorCabecera
+                });
+                headers.forEach((h, i) => {
+                    page.drawText(h, {
+                        x: colX[i] + 4,
+                        y: tableY - rowHeight + 9,
+                        size: 8.5,
+                        font: fontBold,
+                        color: rgb(0.29, 0.16, 0.02)
+                    });
+                });
+                tableY -= rowHeight;
+
+                // Filas
+                cotizacionActual.forEach((item, idx) => {
+                    const rowY = tableY - rowHeight * idx;
+
+                    // Fondo alterno
+                    if (idx % 2 === 1) {
+                        page.drawRectangle({
+                            x: colX[0],
+                            y: rowY - rowHeight + 4,
+                            width: width - 90,
+                            height: rowHeight,
+                            color: rgb(0.97, 0.95, 0.93)
+                        });
+                    }
+
+                    const valores = [
+                        item.numeracion,
+                        formatearLempiras(item.precioUnitario),
+                        String(item.cantidad),
+                        formatearLempiras(item.total)
+                    ];
+                    valores.forEach((v, i) => {
+                        page.drawText(v, {
+                            x: colX[i] + 4,
+                            y: rowY - rowHeight + 9,
+                            size: 8.5,
+                            font: fontNormal,
+                            color: colorOscuro
+                        });
+                    });
+
+                    // Línea separadora
+                    page.drawLine({
+                        start: { x: colX[0], y: rowY - rowHeight + 4 },
+                        end: { x: width - 45, y: rowY - rowHeight + 4 },
+                        thickness: 0.3,
+                        color: colorLinea
+                    });
+                });
+
+                // --- Totales ---
+                const totalesY = tableY - rowHeight * cotizacionActual.length - 14;
+
+                page.drawLine({
+                    start: { x: width - 220, y: totalesY + 14 },
+                    end: { x: width - 45, y: totalesY + 14 },
+                    thickness: 0.8,
+                    color: colorLinea
+                });
+
+                const totalesData = [
+                    ['Subtotal:', formatearLempiras(resumen.subtotal)],
+                    ['ISV 15%:', formatearLempiras(resumen.impuestoIsv)],
+                    ['TOTAL:', formatearLempiras(resumen.total)]
+                ];
+
+                totalesData.forEach(([label, value], i) => {
+                    const ty = totalesY - i * 15;
+                    const isFinal = i === totalesData.length - 1;
+                    page.drawText(label, {
+                        x: width - 220,
+                        y: ty,
+                        size: isFinal ? 10 : 9,
+                        font: fontBold,
+                        color: isFinal ? colorNaranja : colorOscuro
+                    });
+                    page.drawText(value, {
+                        x: width - 120,
+                        y: ty,
+                        size: isFinal ? 10 : 9,
+                        font: isFinal ? fontBold : fontNormal,
+                        color: isFinal ? colorNaranja : colorOscuro
+                    });
+                });
+
+                // Guardar y descargar
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nombreArchivo;
+                a.click();
+                URL.revokeObjectURL(url);
+
+            } catch (err) {
+                console.warn('No se pudo usar el papel membretado, generando PDF sin membretado:', err);
+
+                // Fallback: jsPDF sin membretado
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFillColor(201, 111, 26);
+                doc.rect(0, 0, 210, 28, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.text('COTIZACION', 14, 18);
+
+                doc.setTextColor(40, 40, 40);
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Pet World Isabelinos', 14, 38);
+                doc.text(`Fecha: ${fecha.toLocaleDateString('es-HN')}`, 14, 45);
+                if (clientePDF) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Cliente: ${clientePDF}`, 14, 52);
+                    doc.setFont('helvetica', 'normal');
+                }
+                doc.text(`Lineas: ${resumen.lineas}`, 150, 38);
+                doc.text(`Unidades: ${resumen.totalUnidades}`, 150, 45);
+
+                doc.autoTable({
+                    startY: clientePDF ? 60 : 54,
+                    head: [['Numeracion', 'Precio Unitario', 'Cantidad', 'Subtotal']],
+                    body: cotizacionActual.map(item => [
+                        item.numeracion,
+                        formatearLempiras(item.precioUnitario),
+                        String(item.cantidad),
+                        formatearLempiras(item.total)
+                    ]),
+                    theme: 'grid',
+                    headStyles: { fillColor: [241, 211, 171], textColor: [74, 42, 5] },
+                    styles: { fontSize: 10, cellPadding: 3 }
+                });
+
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Subtotal: ${formatearLempiras(resumen.subtotal)}`, 130, finalY);
+                doc.text(`ISV 15%: ${formatearLempiras(resumen.impuestoIsv)}`, 130, finalY + 8);
+                doc.text(`TOTAL: ${formatearLempiras(resumen.total)}`, 130, finalY + 16);
+
+                doc.save(nombreArchivo);
+            }
+        }
+
+        function eliminarLinea(index) {
+            if (confirm('¿Deseas eliminar esta línea?')) {
+                cotizacionActual.splice(index, 1);
+                actualizarTabla();
+                actualizarPrecio();
+            }
+        }
+
+        function finalizarCotizacion() {
+            if (cotizacionActual.length === 0) {
+                alert('No hay líneas en la cotización');
+                return;
+            }
+
+            const fecha = new Date().toLocaleDateString('es-ES');
+            const resumenTotales = calcularResumenCotizacion();
+
+            let resumen = `
+╔════════════════════════════════════════════════╗
+║           COTIZACIÓN FINALIZADA                ║
+╚════════════════════════════════════════════════╝
+
+Fecha: ${fecha}
+
+DETALLE DE LÍNEAS:
+${'-'.repeat(50)}
+`;
+
+            cotizacionActual.forEach((item, index) => {
+                resumen += `
+${index + 1}. Numeración ${item.numeracion} - ${item.porcentaje}%
+    Precio Unitario: ${formatearLempiras(item.precioUnitario)}
+   Cantidad: ${item.cantidad} unidades
+    Subtotal: ${formatearLempiras(item.total)}
+`;
+            });
+
+            resumen += `
+${'-'.repeat(50)}
+TOTAL DE UNIDADES: ${resumenTotales.totalUnidades}
+SUBTOTAL: ${formatearLempiras(resumenTotales.subtotal)}
+IMPUESTO ISV 15%: ${formatearLempiras(resumenTotales.impuestoIsv)}
+TOTAL: ${formatearLempiras(resumenTotales.total)}
+${'-'.repeat(50)}
+
+¿Deseas realizar otra cotización?
+            `;
+
+            if (confirm(resumen)) {
+                // Reiniciar
+                cotizacionActual = [];
+                actualizarTabla();
+                document.getElementById('porcentaje').value = '';
+                document.getElementById('numeracion').value = '';
+                document.getElementById('cantidad').value = '';
+                actualizarStockInfo();
+            }
+        }
+    </script>
+</body>
+</html>
