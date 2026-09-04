@@ -475,15 +475,20 @@
                 
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="tipoVenta">Tipo de Venta</label>
+                        <select id="tipoVenta" required>
+                            <option value="mayorista" selected>Precio de mayorista</option>
+                            <option value="minorista">Precio de minorista</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="porcentajeGroup" style="display: none;">
                         <label for="porcentaje">% de Venta</label>
                         <select id="porcentaje" required>
                             <option value="">-- Seleccionar --</option>
-                            <option value="80">80%</option>
-                            <option value="90">90%</option>
-                            <option value="100">100%</option>
-                            <option value="110">110%</option>
-                            <option value="115">115%</option>
-                            <option value="120">120%</option>
+                            <option value="10">10%</option>
+                            <option value="15">15%</option>
+                            <option value="20">20%</option>
                         </select>
                     </div>
 
@@ -526,7 +531,7 @@
                         <thead>
                             <tr>
                                 <th>Numeración</th>
-                                <th>% Venta</th>
+                                <th>Tipo de Venta</th>
                                 <th>Precio Unitario</th>
                                 <th>Cantidad</th>
                                 <th>Total</th>
@@ -633,13 +638,23 @@
 
         // Base de datos de productos
         const productos = {
-            "7.5": { unidades: 150, costo: 4.95, precios: { 80: 17.10, 90: 18.20, 100: 20.00, 110: 20.50, 115: 20.60, 120: 20.90 } },
-            "10": { unidades: 500, costo: 5.23, precios: { 80: 20.80, 90: 22.00, 100: 23.00, 110: 24.15, 115: 24.72, 120: 25.30 } },
-            "12.5": { unidades: 200, costo: 8.80, precios: { 80: 23.60, 90: 25.00, 100: 26.00, 110: 27.30, 115: 27.95, 120: 28.60 } },
-            "15": { unidades: 500, costo: 13.75, precios: { 80: 37.00, 90: 39.00, 100: 41.00, 110: 43.05, 115: 44.07, 120: 45.10 } },
-            "20": { unidades: 500, costo: 20.07, precios: { 80: 53.00, 90: 55.50, 100: 58.00, 110: 60.90, 115: 62.35, 120: 63.80 } },
-            "25": { unidades: 250, costo: 26.39, precios: { 80: 65.10, 90: 68.50, 100: 72.00, 110: 75.60, 115: 77.40, 120: 79.20 } },
-            "30": { unidades: 200, costo: 30.79, precios: { 80: 73.00, 90: 76.00, 100: 80.00, 110: 84.00, 115: 86.00, 120: 88.00 } }
+            "7.5": { unidades: 150, costo: 4.95, precios: { 10: 11.00, 15: 11.50, 20: 12.00 } },
+            "10": { unidades: 500, costo: 5.23, precios: { 10: 14.30, 15: 14.95, 20: 15.60 } },
+            "12.5": { unidades: 200, costo: 8.80, precios: { 10: 22.40, 15: 23.42, 20: 24.44 } },
+            "15": { unidades: 500, costo: 13.75, precios: { 10: 53.90, 15: 56.35, 20: 58.80 } },
+            "20": { unidades: 500, costo: 20.07, precios: { 10: 66.00, 15: 69.00, 20: 72.00 } },
+            "25": { unidades: 250, costo: 26.39, precios: { 10: 60.50, 15: 63.25, 20: 66.00 } },
+            "30": { unidades: 200, costo: 30.79, precios: { 10: 78.10, 15: 81.65, 20: 85.20 } }
+        };
+
+        const preciosMayorista = {
+            "7.5": 10.00,
+            "10": 13.00,
+            "12.5": 20.40,
+            "15": 49.00,
+            "20": 60.00,
+            "25": 55.00,
+            "30": 71.00
         };
 
         let cotizacionActual = [];
@@ -666,9 +681,29 @@
         cargarInventarioDesdeSheets();
 
         // Event listeners
+        document.getElementById('tipoVenta').addEventListener('change', actualizarTipoVenta);
         document.getElementById('porcentaje').addEventListener('change', actualizarPrecio);
         document.getElementById('numeracion').addEventListener('change', actualizarPrecio);
         document.getElementById('cantidad').addEventListener('input', actualizarPrecio);
+
+        actualizarTipoVenta();
+
+        function actualizarTipoVenta() {
+            const tipoVenta = document.getElementById('tipoVenta').value;
+            const porcentajeGroup = document.getElementById('porcentajeGroup');
+            const porcentajeSelect = document.getElementById('porcentaje');
+
+            if (tipoVenta === 'minorista') {
+                porcentajeGroup.style.display = 'block';
+                porcentajeSelect.disabled = false;
+            } else {
+                porcentajeGroup.style.display = 'none';
+                porcentajeSelect.value = '';
+                porcentajeSelect.disabled = true;
+            }
+
+            actualizarPrecio();
+        }
 
         function obtenerStockDisponible(numeracion) {
             const producto = productos[numeracion];
@@ -766,6 +801,7 @@
         }
 
         function actualizarPrecio() {
+            const tipoVenta = document.getElementById('tipoVenta').value;
             const porcentaje = document.getElementById('porcentaje').value;
             const numeracion = document.getElementById('numeracion').value;
             const cantidad = document.getElementById('cantidad').value;
@@ -775,20 +811,24 @@
             errorCantidad.textContent = '';
             actualizarStockInfo();
 
-            if (porcentaje && numeracion && cantidad) {
-                if (cantidad <= 0) {
+            if (tipoVenta && numeracion) {
+                if (cantidad && cantidad <= 0) {
                     errorCantidad.textContent = 'La cantidad debe ser mayor que 0';
                     priceDisplay.style.display = 'none';
                     return;
                 }
 
-                if (!validarCantidadContraStock(numeracion, parseInt(cantidad, 10))) {
+                if (cantidad && !validarCantidadContraStock(numeracion, parseInt(cantidad, 10))) {
                     priceDisplay.style.display = 'none';
                     return;
                 }
 
-                const producto = productos[numeracion];
-                const precioUnitario = producto.precios[parseInt(porcentaje)];
+                const precioUnitario = obtenerPrecioUnitario(numeracion, tipoVenta, porcentaje);
+                if (!Number.isFinite(precioUnitario)) {
+                    priceDisplay.style.display = 'none';
+                    return;
+                }
+
                 document.getElementById('precioUnitario').textContent = formatearLempiras(precioUnitario);
                 priceDisplay.style.display = 'block';
             } else {
@@ -796,7 +836,21 @@
             }
         }
 
+        function obtenerPrecioUnitario(numeracion, tipoVenta, porcentaje) {
+            if (tipoVenta === 'mayorista') {
+                return preciosMayorista[numeracion];
+            }
+
+            const producto = productos[numeracion];
+            if (!producto || !porcentaje) {
+                return NaN;
+            }
+
+            return producto.precios[parseInt(porcentaje, 10)];
+        }
+
         function agregarLinea() {
+            const tipoVenta = document.getElementById('tipoVenta').value;
             const porcentaje = document.getElementById('porcentaje').value;
             const numeracion = document.getElementById('numeracion').value;
             const cantidad = parseInt(document.getElementById('cantidad').value);
@@ -805,7 +859,7 @@
             errorCantidad.textContent = '';
 
             // Validaciones
-            if (!porcentaje) {
+            if (tipoVenta === 'minorista' && !porcentaje) {
                 alert('Por favor selecciona un porcentaje de venta');
                 return;
             }
@@ -822,12 +876,17 @@
                 return;
             }
 
-            const producto = productos[numeracion];
-            const precioUnitario = producto.precios[parseInt(porcentaje)];
+            const precioUnitario = obtenerPrecioUnitario(numeracion, tipoVenta, porcentaje);
+            if (!Number.isFinite(precioUnitario)) {
+                alert('No se pudo determinar el precio para la selección actual');
+                return;
+            }
+
             const total = precioUnitario * cantidad;
 
             cotizacionActual.push({
                 numeracion: numeracion,
+                tipoVenta: tipoVenta,
                 porcentaje: porcentaje,
                 precioUnitario: precioUnitario,
                 cantidad: cantidad,
@@ -835,11 +894,12 @@
             });
 
             // Limpiar formulario
+            document.getElementById('tipoVenta').value = 'mayorista';
             document.getElementById('porcentaje').value = '';
             document.getElementById('numeracion').value = '';
             document.getElementById('cantidad').value = '';
             document.getElementById('priceDisplay').style.display = 'none';
-            actualizarStockInfo();
+            actualizarTipoVenta();
 
             actualizarTabla();
         }
@@ -863,7 +923,7 @@
             tableBody.innerHTML = cotizacionActual.map((item, index) => `
                 <tr>
                     <td>${item.numeracion}</td>
-                    <td>${item.porcentaje}%</td>
+                    <td>${item.tipoVenta === 'mayorista' ? 'Mayorista' : `${item.porcentaje}%`}</td>
                     <td>${formatearLempiras(item.precioUnitario)}</td>
                     <td>${item.cantidad}</td>
                     <td>${formatearLempiras(item.total)}</td>
@@ -1181,8 +1241,9 @@ ${'-'.repeat(50)}
 `;
 
             cotizacionActual.forEach((item, index) => {
+                const detalleVenta = item.tipoVenta === 'mayorista' ? 'Mayorista' : `Minorista ${item.porcentaje}%`;
                 resumen += `
-${index + 1}. Numeración ${item.numeracion} - ${item.porcentaje}%
+${index + 1}. Numeración ${item.numeracion} - ${detalleVenta}
     Precio Unitario: ${formatearLempiras(item.precioUnitario)}
    Cantidad: ${item.cantidad} unidades
     Subtotal: ${formatearLempiras(item.total)}
@@ -1204,10 +1265,11 @@ ${'-'.repeat(50)}
                 // Reiniciar
                 cotizacionActual = [];
                 actualizarTabla();
+                document.getElementById('tipoVenta').value = 'mayorista';
                 document.getElementById('porcentaje').value = '';
                 document.getElementById('numeracion').value = '';
                 document.getElementById('cantidad').value = '';
-                actualizarStockInfo();
+                actualizarTipoVenta();
             }
         }
     </script>
